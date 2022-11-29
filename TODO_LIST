@@ -1,0 +1,10 @@
+已实现：
+1.禁用Compaction，所有的SSTable均存储在Level0层
+2.writebatch的put接口添加了bid参数，用以表示每个KV对的区块号
+3.memtable以及Filemeta等结构中增加了bid最大最小值，并修改相应写入逻辑维护bid最大最小值
+
+
+TODO：
+1.memtable以及SSTABLE中相同key对应value的合并
+2.查询逻辑，根据每个文件bid的范围快速索引和过滤
+3.Epoch的结构以及RAMBO的结合
