@@ -18,7 +18,8 @@
 #include <unordered_set>
 #include <thread>
 #include <future>
-
+#include <tbb/tbb.h>
+#include <sys/time.h>
 using namespace std;
 
 
@@ -38,8 +39,8 @@ int main(int argc, char **argv) {
 
     //test blockchain data
 
-    fstream f("test_modified.txt"); //（读取的文件！！！！！！！！！！！！！！！！！！！！！！！！）
-    //fstream f("rambo_data_10000000.txt");
+    //fstream f("/home/z/rambo/ramboDB/test_modified.txt"); //（读取的文件！！！！！！！！！！！！！！！！！！！！！！！！）
+    fstream f("rambo_data_10000000.txt");
     //fstream f("xaa");
     //unordered_set<string> key_set;
     std::unordered_map<string, unordered_set<int>> key_set;
@@ -73,7 +74,7 @@ int main(int argc, char **argv) {
 
 
     vector<RAMBO> rambo_vector;
-    RAMBO temprambo = RAMBO(n_perSet, R_all, B_all, end-start+1);
+    RAMBO temprambo = RAMBO(n_perSet, R_all, B_all, end-start+1,start-1);
     rambo_vector.emplace_back(temprambo); //一开始就一个Rambo
     
     int now_insert_num = 0;
@@ -91,7 +92,7 @@ int main(int argc, char **argv) {
         while(file_num>=end){ //如果需要一个新的Rambo
             start+=delta_range;
             end+=delta_range;
-            RAMBO temprambo = RAMBO(n_perSet, R_all, B_all, end-start+1);
+            RAMBO temprambo = RAMBO(n_perSet, R_all, B_all, end-start+1,start-1);
             rambo_vector.emplace_back(temprambo);
         }
         //f_write<<KeySets[0]<<" "<<KeySets[1]<<endl;
@@ -164,7 +165,9 @@ int main(int argc, char **argv) {
     int now_key_num = 0;
 
     int test_num = 0;
-    std::clock_t search1 = std::clock();
+    //std::clock_t search1 = std::clock();
+    timeval t_start, t_end;
+    gettimeofday( &t_start, NULL);
 
     if(argv[2][0]=='0'){ //0表示查询返回的是bias bitset
         out<<"using bitset"<<endl;
@@ -176,29 +179,49 @@ int main(int argc, char **argv) {
 
             int true_num = x.second.size();
             int guess_num = 0;
-            //boost::dynamic_bitset<> MemVec = myRambo.query_bias(x, x.size(), bias);
+
+
+            
+            // //boost::dynamic_bitset<> MemVec = myRambo.query_bias(x, x.size(), bias);
             out<<x.first<<endl;
+
+
+//using tbb!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             //using bitset
             /*
             out<<"guess answer :"<<endl;
              */
-            for(int i=0;i<rambo_vector.size();i++){
-                
-                int bias = all_start+i*delta_range-1;
+            tbb::concurrent_vector<int> parallel_answer;
 
-                
-                boost::dynamic_bitset<> MemVec = rambo_vector[i].query_bias(x.first, x.first.size(), bias);
-                guess_num += MemVec.count();
+            tbb::parallel_for_each(rambo_vector.begin(), rambo_vector.end(), [&](RAMBO &r){
+                //std::cout << r.i << std::endl; 
+                int bias = r.bias;
+                boost::dynamic_bitset<> MemVec = r.query_bias(x.first, x.first.size(), bias);
+                parallel_answer.emplace_back(MemVec.count());
 
-//
-//                for (size_t i = MemVec.find_first(); i != boost::dynamic_bitset<>::npos;) {
-//                    out << i+bias << " ";
-//                    //guess_num++;
-//                    i = MemVec.find_next(i);
-//                }
-//                out<<endl;
+            });
 
+            for(auto x:parallel_answer){
+                guess_num+=x;
             }
+
+//using for cycle!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//             for(int i=0;i<rambo_vector.size();i++){
+                
+//                 //int bias = all_start+i*delta_range-1;
+//                 int bias = rambo_vector[i].bias;
+                
+//                 boost::dynamic_bitset<> MemVec = rambo_vector[i].query_bias(x.first, x.first.size(), bias);
+//                 guess_num += MemVec.count();
+
+// //
+// //                for (size_t i = MemVec.find_first(); i != boost::dynamic_bitset<>::npos;) {
+// //                    out << i+bias << " ";
+// //                    //guess_num++;
+// //                    i = MemVec.find_next(i);
+// //                }
+// //                out<<endl;
+//             }
 
             now_key_num++;
             if(now_key_num%10000==0){
@@ -213,8 +236,8 @@ int main(int argc, char **argv) {
             out<<endl;
 */
             if(guess_num<true_num){
-                out<<"wrong: "<<x.first<<endl;
-                out<<endl;
+                cout<<"wrong: "<<x.first<<endl;
+                cout<<endl;
             }
 
 
@@ -274,7 +297,10 @@ int main(int argc, char **argv) {
     }
     
 
-    std::clock_t search2 = std::clock();
+    //std::clock_t search2 = std::clock();
+    gettimeofday( &t_end, NULL);
+
+
 
     std::clock_t search3 = std::clock();
     int b = 0;
@@ -292,7 +318,12 @@ int main(int argc, char **argv) {
 
 
 
-    search_time += double(search2-search1)/CLOCKS_PER_SEC;
+    //search_time += double(search2-search1)/CLOCKS_PER_SEC;
+
+    double delta_t = (t_end.tv_sec-t_start.tv_sec) + 
+                (t_end.tv_usec-t_start.tv_usec)/1000000.0;
+
+    search_time += delta_t;
     search_time2 += double(search4-search3)/CLOCKS_PER_SEC;
     out<<"key set size:"<<key_set.size()<<endl;
     out<<"average fp:"<<(fp*1.0)/(key_set.size())<<endl;
