@@ -292,6 +292,10 @@ if(HAVE_TCMALLOC)
   target_link_libraries(leveldb tcmalloc)
 endif(HAVE_TCMALLOC)
 
+# Needed by rambo
+find_package(TBB REQUIRED)
+
+
 # Needed by port_stdcxx.h
 find_package(Threads REQUIRED)
 target_link_libraries(leveldb Threads::Threads)
@@ -388,7 +392,7 @@ if(LEVELDB_BUILD_TESTS)
 
         "${test_file}"
     )
-    target_link_libraries("${test_target_name}" leveldb tbb crypto gmock gtest)
+    target_link_libraries("${test_target_name}" leveldb TBB::tbb crypto gmock gtest)
     target_compile_definitions("${test_target_name}"
       PRIVATE
         ${LEVELDB_PLATFORM_NAME}=1

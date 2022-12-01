@@ -14,6 +14,6 @@ MyRamboApi::MyRamboApi(int n_perSet_, int R_all_, int B_all_, int all_start_, in
     current_key_num = 0;
     start = all_start_;
     end = delta_range_;
-    RAMBO temprambo = RAMBO(n_perSet, R_all, B_all, end-start+1);
+    RAMBO temprambo = RAMBO(n_perSet, R_all, B_all, end-start+1,start-1);
     rambo_vector.emplace_back(temprambo);
 }

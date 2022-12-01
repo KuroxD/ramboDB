@@ -17,7 +17,7 @@
 class RAMBO {
 public:
 
-    RAMBO(int n, int r1, int b1, int K);
+    RAMBO(int n, int r1, int b1, int K,int bias_);
 
     std::vector<uint> hashfunc(std::string key, int len);
 
@@ -66,6 +66,7 @@ public:
     int k;
     float FPR;
     int K1;
+    int bias;
     BloomFiler **Rambo_array;
     //std::vector<int> *metaRambo;
     std::unordered_set<int> *metaRambo;
