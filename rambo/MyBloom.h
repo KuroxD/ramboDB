@@ -15,6 +15,7 @@ class BloomFiler{
         bool test(std::vector<uint> a);
         void serializeBF(std::string BF_file);
         void deserializeBF(std::vector<std::string> BF_file);
+        void merge_another_bf(BloomFiler *another_bf);
 
         // void serialize1(std::string BF_file);
 

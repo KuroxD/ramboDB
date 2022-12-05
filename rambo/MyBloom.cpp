@@ -53,3 +53,8 @@ void BloomFiler::serializeBF(string BF_file){
 void BloomFiler::deserializeBF(vector<string> BF_file){
   m_bits->deserializeBitAr(BF_file);
 }
+
+void BloomFiler::merge_another_bf(BloomFiler *another_bf){
+    m_bits->ORop(another_bf->m_bits->A);
+
+};
