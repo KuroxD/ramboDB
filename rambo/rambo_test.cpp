@@ -32,11 +32,12 @@ int main(int argc, char **argv) {
     //test myrambo MyRamboApi(int n_perSet_, int R_all_, int B_all, int all_start_, int delta_range)
 
     //MyRamboApi myrambo(3000000,4,7,0,40);
-    MyRamboApi myrambo(1000000,3,4,0,10);
+    //MyRamboApi myrambo(2000000,3,5,0,20);
+    MyRamboApi myrambo(1250000,3,4,0,10);
     std::unordered_map<string, set<int>> key_set;
 
     //read
-    fstream f("rambo_data_10000000.txt");
+    fstream f("rambo_data_20000000.txt");
     int file_target = 500000;
     string line;
     int current_key_num = 0;
@@ -75,40 +76,39 @@ int main(int argc, char **argv) {
     }
     file_num++;
     current_key_num = 0;
+    ofstream out(argv[1]);
+    out<<"rambo num:"<<myrambo.rambo_vector.size()<<endl;
+    for(int t=0;t<myrambo.rambo_vector.size();t++){
+        out<<t<<":     bias:"<<myrambo.rambo_vector[t].bias<<"  length:"<<myrambo.rambo_vector[t].K1<<endl;
+    }
 
-    cout<<"rambo num:"<<myrambo.rambo_vector.size()<<endl;
-
-    //merge
-    myrambo.merge_two_neighbor_rambo(0);
-
-    cout<<"rambo num:"<<myrambo.rambo_vector.size()<<endl;
     //query
     timeval t_start, t_end;
 
     double search_time = 0;
 
-    ofstream out(argv[1]);
+    
     double fp = 0;
     int now_key_num = 0;
 
     gettimeofday( &t_start, NULL);
     for(auto &x:key_set){
-        out<<x.first<<":"<<endl;
+        //out<<x.first<<":"<<endl;
         int true_num = x.second.size();
         
-        for(auto &y:x.second){
-            out<<y<<",";
-        }
+        // for(auto &y:x.second){
+        //     out<<y<<",";
+        // }
 
-        out<<endl;
-        out<<"======================================================"<<endl;
+        // out<<endl;
+        // out<<"======================================================"<<endl;
         
         vector<int> guess = myrambo.myrambo_search(x.first);
         int guess_num = guess.size();
-        for(auto &y:guess){
-            out<<y<<",";
-        }
-        out<<endl;
+        // for(auto &y:guess){
+        //     out<<y<<",";
+        // }
+        // out<<endl;
         if(guess_num<true_num){
             cout<<"wrong: "<<x.first<<endl;
             cout<<endl;
@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
 
 
 
-        out<<((guess_num-true_num)*0.1)/(guess_num*0.1)<<endl;
+        //out<<((guess_num-true_num)*0.1)/(guess_num*0.1)<<endl;
 
         fp+=((guess_num-true_num)*0.1)/(guess_num*0.1);
 
@@ -139,6 +139,82 @@ int main(int argc, char **argv) {
     out<<"key set size:"<<key_set.size()<<endl;
     out<<"average fp:"<<(fp*1.0)/(key_set.size())<<endl;
     out<<"rambo search time:"<<search_time<<endl;
+
+
+
+
+    //merge
+    myrambo.merge_two_neighbor_rambo(0);
+
+    out<<"rambo num:"<<myrambo.rambo_vector.size()<<endl;
+    for(int t=0;t<myrambo.rambo_vector.size();t++){
+        out<<t<<":     bias:"<<myrambo.rambo_vector[t].bias<<"  length:"<<myrambo.rambo_vector[t].K1<<endl;
+    }
+
+
+    //search again
+
+    search_time = 0;
+
+    fp = 0;
+    now_key_num = 0;
+
+    gettimeofday( &t_start, NULL);
+    for(auto &x:key_set){
+        //out<<x.first<<":"<<endl;
+        int true_num = x.second.size();
+        
+        // for(auto &y:x.second){
+        //     out<<y<<",";
+        // }
+
+        // out<<endl;
+        // out<<"======================================================"<<endl;
+        
+        vector<int> guess = myrambo.myrambo_search(x.first);
+        int guess_num = guess.size();
+        // for(auto &y:guess){
+        //     out<<y<<",";
+        // }
+        // out<<endl;
+        if(guess_num<true_num){
+            cout<<"wrong: "<<x.first<<endl;
+            cout<<endl;
+        }
+
+
+
+        //out<<((guess_num-true_num)*0.1)/(guess_num*0.1)<<endl;
+
+        fp+=((guess_num-true_num)*0.1)/(guess_num*0.1);
+
+        now_key_num++;
+        if(now_key_num%10000==0){
+            cout<<"having searched "<<now_key_num<<" keys!"<<endl;
+        }
+
+    }
+    gettimeofday( &t_end, NULL);
+
+    delta_t = (t_end.tv_sec-t_start.tv_sec) + 
+                (t_end.tv_usec-t_start.tv_usec)/1000000.0;
+    search_time += delta_t;
+
+    cout<<"use for cycle:"<<endl;
+    cout<<"key set size:"<<key_set.size()<<endl;
+    cout<<"average fp:"<<(fp*1.0)/(key_set.size())<<endl;
+    out<<"use for cycle:"<<endl;
+    out<<"key set size:"<<key_set.size()<<endl;
+    out<<"average fp:"<<(fp*1.0)/(key_set.size())<<endl;
+    out<<"rambo search time:"<<search_time<<endl;
+
+
+    out<<"rambo num:"<<myrambo.rambo_vector.size()<<endl;
+    for(int t=0;t<myrambo.rambo_vector.size();t++){
+        out<<t<<":     bias:"<<myrambo.rambo_vector[t].bias<<"  length:"<<myrambo.rambo_vector[t].K1<<endl;
+    }
+
+
 
 
 
