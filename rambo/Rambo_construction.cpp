@@ -1,24 +1,6 @@
-#include <iomanip>
-#include <fstream>
-#include <iostream>
-#include <chrono>
-#include <vector>
-#include <math.h>
-#include <sstream>
-#include <string>
-#include <string.h>
-#include <algorithm>
-#include "MyBloom.h"
-#include "MurmurHash3.h"
+
 #include "Rambo_construction.h"
-#include "utils.h"
-#include "constants.h"
-#include "bitArray.h"
-#include <set>
-#include <iterator>
-#include <bitset>
-#include <unordered_set>
-#include <boost/dynamic_bitset.hpp>
+
 
 using namespace std;
 
@@ -165,6 +147,7 @@ boost::dynamic_bitset<> RAMBO::query_bias(std::string query_key, int len, int bi
                 //count+=((t6-t5).count()/1000000000.0);
             }
         }
+
         //chrono::time_point<chrono::high_resolution_clock> t2 = chrono::high_resolution_clock::now();
         
         
@@ -241,3 +224,12 @@ set<int> RAMBO::query_bias_set(std::string query_key, int len) {
     
     return resUnion[R-1];
 }
+
+
+void RAMBO::merge_another_rambo(RAMBO &b){
+    K1 += b.K1;
+    for(int i=0;i<B * R;i++){
+        Rambo_array[i]->merge_another_bf(b.Rambo_array[i]);
+        metaRambo[i].insert(b.metaRambo[i].begin(),b.metaRambo[i].end());
+    } 
+};

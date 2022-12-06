@@ -37,6 +37,12 @@ void bitArray::ANDop(char* B){
   }
 }
 
+void bitArray::ORop(char* B){
+  for (int i=0; i<(ar_size/8 +1); i++ ){
+    A[i] |= B[i];
+  }
+}
+
 int bitArray::getcount(void){
   int count = 0;
 
